@@ -1,0 +1,6 @@
+if SHIELD_BANIME40
+
+config ZMK_KEYBOARD_NAME
+    default "banime40"
+
+endif

@@ -1,0 +1,8 @@
+# Ma trận build cho GitHub Actions của ZMK.
+# SuperMini nRF52840 tương thích nice!nano v2 (cùng bootloader UF2 + pin map).
+# Nếu bạn dùng controller khác, đổi/thêm dòng board tương ứng:
+#   - Pro Micro RP2040 : board: sparkfun_pro_micro_rp2040
+#   - nice!nano v1     : board: nice_nano
+include:
+  - board: nice_nano_v2
+    shield: banime40

@@ -1,0 +1,8 @@
+file_format: "1"
+id: banime40
+name: banime40
+type: shield
+url: https://github.com/ChrisChrisLoLo/banime40
+requires: [pro_micro]
+features:
+  - keys
