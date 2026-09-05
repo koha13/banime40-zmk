@@ -31,8 +31,8 @@
             ;
 
         col-gpios
-            = <&pro_micro  8 GPIO_ACTIVE_HIGH>  /* B4 */
-            , <&pro_micro  9 GPIO_ACTIVE_HIGH>  /* B5 */
+            = <&pro_micro  9 GPIO_ACTIVE_HIGH>  /* B4 */
+            , <&pro_micro  8 GPIO_ACTIVE_HIGH>  /* B5 */
             , <&pro_micro 10 GPIO_ACTIVE_HIGH>  /* B6 */
             , <&pro_micro 16 GPIO_ACTIVE_HIGH>  /* B2 */
             , <&pro_micro 14 GPIO_ACTIVE_HIGH>  /* B3 */
