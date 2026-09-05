@@ -25,6 +25,8 @@
 &sk {
     release-after-ms = <300>;
     lazy;
+
+    /delete-property/ ignore-modifiers;
 };
 
 / {
