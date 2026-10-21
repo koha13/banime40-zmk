@@ -52,6 +52,24 @@ west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=banime40
 
 Diode direction: `COL2ROW` (rows = input pull-down, cols = output).
 
+## Trackpad Azoteq TPS43
+
+Driver: [AYM1607/zmk-driver-azoteq-iqs5xx](https://github.com/AYM1607/zmk-driver-azoteq-iqs5xx)
+(khai báo trong `config/west.yml`). TPS43 dùng chip IQS572, giao tiếp I2C địa chỉ `0x74`.
+
+| TPS43 | `&pro_micro` | nRF52840 |
+|-------|--------------|----------|
+| SDA   | 2            | P0.17    |
+| SCL   | 3            | P0.20    |
+| RDY   | 1            | P0.06    |
+| NRST  | 0            | P0.08    |
+| VDD   | 3V3 (VCC)    | —        |
+| GND   | GND          | —        |
+
+Gesture mặc định (sửa trong node `tps43` của `banime40.overlay`): chạm 1 ngón = click trái,
+chạm 2 ngón = click phải, chạm-giữ = kéo thả, vuốt 2 ngón = cuộn.
+Nếu hướng con trỏ bị ngược/xoay, thêm `switch-xy;`, `flip-x;`, `flip-y;` vào node.
+
 ## Lưu ý về keymap
 
 `keyboard.json` của QMK **không chứa keymap** (nằm ở `keymap.c` không được cung cấp),
