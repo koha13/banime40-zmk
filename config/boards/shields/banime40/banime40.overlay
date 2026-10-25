@@ -85,6 +85,7 @@
         stationary-threshold = <5>;
 
         /* Chỉnh hướng theo cách lắp trackpad: switch-xy; flip-x; flip-y; */
+        switch-xy;               /* trục X/Y bị hoán đổi theo hướng lắp hiện tại */
     };
 };
 
