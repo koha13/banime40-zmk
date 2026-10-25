@@ -470,7 +470,8 @@ static int iqs5xx_init(const struct device *dev) {
         .scroll_divisor = DT_INST_PROP_OR(n, scroll_divisor, 32),                                  \
         .multi_finger_lockout_ms = DT_INST_PROP_OR(n, multi_finger_lockout_ms, 150),               \
         .two_finger_nav = DT_INST_PROP(n, two_finger_nav),                                         \
-        .two_finger_nav_distance = DT_INST_PROP_OR(n, two_finger_nav_distance, 400),                       .two_finger_nav_time_ms = DT_INST_PROP_OR(n, two_finger_nav_time_ms, 120),                 \
+        .two_finger_nav_distance = DT_INST_PROP_OR(n, two_finger_nav_distance, 400),               \
+        .two_finger_nav_time_ms = DT_INST_PROP_OR(n, two_finger_nav_time_ms, 120),                 \
         .press_and_hold_time = DT_INST_PROP_OR(n, press_and_hold_time, 250),                       \
         .switch_xy = DT_INST_PROP(n, switch_xy),                                                   \
         .flip_x = DT_INST_PROP(n, flip_x),                                                         \
