@@ -100,6 +100,12 @@
 // Minimum time between two back/forward swipes.
 #define IQS5XX_NAV_COOLDOWN_MS 400
 
+// Classification of a horizontal two-finger swipe.
+#define IQS5XX_NAV_IDLE 0    // No horizontal swipe in progress.
+#define IQS5XX_NAV_PENDING 1 // Movement held back until flick vs. scroll is known.
+#define IQS5XX_NAV_SCROLL 2  // Too slow for a flick: horizontal scroll.
+#define IQS5XX_NAV_FIRED 3   // Back/forward sent; ignore the rest of the swipe.
+
 // These 2 registers have the same bit map.
 // The first one configures the gestures,
 // the second one reports gesture events at runtime.
@@ -135,9 +141,10 @@ struct iqs5xx_config {
     uint16_t scroll_divisor;
     // Cursor movement is suppressed for this long after the last multi-finger report.
     uint16_t multi_finger_lockout_ms;
-    // Horizontal two-finger swipe sends mouse back/forward instead of horizontal scroll.
+    // A fast horizontal two-finger flick sends mouse back/forward, slower swipes scroll.
     bool two_finger_nav;
     uint16_t two_finger_nav_distance;
+    uint16_t two_finger_nav_time_ms;
 
     // Axes configuration.
     bool switch_xy;
@@ -166,6 +173,7 @@ struct iqs5xx_data {
     int64_t last_multi_finger_ms;
     // Two-finger back/forward swipe state.
     int32_t nav_x_acc;
-    bool nav_fired;
+    uint8_t nav_phase;
+    int64_t nav_start_ms;
     int64_t last_nav_ms;
 };

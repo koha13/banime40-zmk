@@ -125,7 +125,7 @@ static void iqs5xx_work_handler(struct k_work *work) {
         data->scroll_x_acc = 0;
         data->scroll_y_acc = 0;
         data->nav_x_acc = 0;
-        data->nav_fired = false;
+        data->nav_phase = IQS5XX_NAV_IDLE;
     }
 
     uint16_t button_code;
@@ -193,12 +193,29 @@ static void iqs5xx_work_handler(struct k_work *work) {
 
         // Only one scrolling direction is valid at a time.
         // End the communication right after reporting the movement.
-        if (rel_x != 0 && config->two_finger_nav) {
-            // One back/forward per swipe; the cooldown guards against the scroll
-            // flag briefly dropping mid-swipe and re-arming the gesture.
+        if (rel_x != 0 && config->two_finger_nav && data->nav_phase != IQS5XX_NAV_SCROLL) {
+            // A horizontal swipe covering two-finger-nav-distance within
+            // two-finger-nav-time-ms is a flick (back/forward, once per swipe);
+            // anything slower becomes horizontal scroll. Movement is held back
+            // until the swipe is classified so a flick never scrolls the page.
+            int64_t now = k_uptime_get();
+
+            if (data->nav_phase == IQS5XX_NAV_FIRED) {
+                goto end_comm;
+            }
+            if (data->nav_phase == IQS5XX_NAV_IDLE) {
+                data->nav_phase = IQS5XX_NAV_PENDING;
+                data->nav_start_ms = now;
+                data->nav_x_acc = 0;
+            }
+
             data->nav_x_acc += rel_x;
-            if (!data->nav_fired && abs(data->nav_x_acc) >= config->two_finger_nav_distance &&
-                k_uptime_get() - data->last_nav_ms > IQS5XX_NAV_COOLDOWN_MS) {
+            bool in_window = now - data->nav_start_ms <= config->two_finger_nav_time_ms;
+
+            // The cooldown guards against the scroll flag briefly dropping
+            // mid-swipe and re-arming the gesture.
+            if (in_window && abs(data->nav_x_acc) >= config->two_finger_nav_distance &&
+                now - data->last_nav_ms > IQS5XX_NAV_COOLDOWN_MS) {
                 // Fingers moving right = back (content follows the fingers), as on Windows.
                 uint16_t code = data->nav_x_acc > 0 ? BACK_BUTTON_CODE : FORWARD_BUTTON_CODE;
 
@@ -207,10 +224,17 @@ static void iqs5xx_work_handler(struct k_work *work) {
                 data->buttons_pressed |= BIT(code - INPUT_BTN_0);
                 k_work_schedule(&data->button_release_work, K_MSEC(100));
 
-                data->nav_fired = true;
-                data->last_nav_ms = k_uptime_get();
+                data->nav_phase = IQS5XX_NAV_FIRED;
+                data->last_nav_ms = now;
+                goto end_comm;
             }
-            goto end_comm;
+            if (in_window) {
+                goto end_comm;
+            }
+
+            // Too slow for a flick: scroll, including the movement held back so far.
+            data->nav_phase = IQS5XX_NAV_SCROLL;
+            rel_x = CLAMP(data->nav_x_acc, INT16_MIN, INT16_MAX);
         }
         if (rel_x != 0) {
             // By default the x axis is already "natural".
@@ -446,7 +470,7 @@ static int iqs5xx_init(const struct device *dev) {
         .scroll_divisor = DT_INST_PROP_OR(n, scroll_divisor, 32),                                  \
         .multi_finger_lockout_ms = DT_INST_PROP_OR(n, multi_finger_lockout_ms, 150),               \
         .two_finger_nav = DT_INST_PROP(n, two_finger_nav),                                         \
-        .two_finger_nav_distance = DT_INST_PROP_OR(n, two_finger_nav_distance, 300),               \
+        .two_finger_nav_distance = DT_INST_PROP_OR(n, two_finger_nav_distance, 400),                       .two_finger_nav_time_ms = DT_INST_PROP_OR(n, two_finger_nav_time_ms, 120),                 \
         .press_and_hold_time = DT_INST_PROP_OR(n, press_and_hold_time, 250),                       \
         .switch_xy = DT_INST_PROP(n, switch_xy),                                                   \
         .flip_x = DT_INST_PROP(n, flip_x),                                                         \

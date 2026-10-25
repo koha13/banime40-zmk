@@ -54,13 +54,23 @@ properties:
   two-finger-nav:
     type: boolean
     description: |
-      Turn horizontal two-finger swipes into mouse back (fingers right) and
-      forward (fingers left) clicks, once per swipe. Replaces horizontal scroll.
+      Turn fast horizontal two-finger flicks into mouse back (fingers right) and
+      forward (fingers left) clicks, once per swipe. Slower horizontal swipes
+      keep scrolling horizontally.
 
   two-finger-nav-distance:
     type: int
-    description: "Horizontal two-finger travel (in trackpad units) that triggers back/forward"
-    default: 300
+    description: |
+      Horizontal two-finger travel (in trackpad units) that must be covered within
+      two-finger-nav-time-ms to count as a back/forward flick.
+    default: 400
+
+  two-finger-nav-time-ms:
+    type: int
+    description: |
+      Time window in ms from the start of a horizontal swipe in which it is
+      classified. Horizontal scroll output is delayed by at most this long.
+    default: 120
 
   switch-xy:
     type: boolean
