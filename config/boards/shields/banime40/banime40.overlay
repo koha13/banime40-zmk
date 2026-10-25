@@ -79,7 +79,11 @@
         press-and-hold;          /* giữ          = kéo thả */
         press-and-hold-time = <250>;
         scroll;                  /* 2 ngón vuốt  = cuộn dọc/ngang */
-        natural-scroll-y;
+        /*
+         * Không đặt natural-scroll-x/y: mặc định của driver đã giống Windows
+         * (nội dung đi theo ngón tay — vuốt xuống thì trang cuộn lên).
+         * Thêm natural-scroll-y nếu muốn kiểu bánh xe chuột (vuốt xuống = cuộn xuống).
+         */
 
         bottom-beta = <5>;
         stationary-threshold = <5>;
