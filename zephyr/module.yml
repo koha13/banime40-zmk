@@ -1,0 +1,7 @@
+# Repo này đồng thời là một Zephyr module, để build kèm driver IQS5xx đã vendor.
+name: banime40
+build:
+  cmake: modules/zmk-driver-azoteq-iqs5xx
+  kconfig: modules/zmk-driver-azoteq-iqs5xx/Kconfig
+  settings:
+    dts_root: modules/zmk-driver-azoteq-iqs5xx
