@@ -94,6 +94,11 @@
 #define LEFT_BUTTON_CODE INPUT_BTN_0
 #define RIGHT_BUTTON_CODE INPUT_BTN_0 + 1
 #define MIDDLE_BUTTON_CODE INPUT_BTN_0 + 2
+#define BACK_BUTTON_CODE INPUT_BTN_0 + 3
+#define FORWARD_BUTTON_CODE INPUT_BTN_0 + 4
+
+// Minimum time between two back/forward swipes.
+#define IQS5XX_NAV_COOLDOWN_MS 400
 
 // These 2 registers have the same bit map.
 // The first one configures the gestures,
@@ -130,6 +135,9 @@ struct iqs5xx_config {
     uint16_t scroll_divisor;
     // Cursor movement is suppressed for this long after the last multi-finger report.
     uint16_t multi_finger_lockout_ms;
+    // Horizontal two-finger swipe sends mouse back/forward instead of horizontal scroll.
+    bool two_finger_nav;
+    uint16_t two_finger_nav_distance;
 
     // Axes configuration.
     bool switch_xy;
@@ -156,4 +164,8 @@ struct iqs5xx_data {
     int16_t scroll_y_acc;
     // Uptime of the last report with two or more fingers on the pad.
     int64_t last_multi_finger_ms;
+    // Two-finger back/forward swipe state.
+    int32_t nav_x_acc;
+    bool nav_fired;
+    int64_t last_nav_ms;
 };

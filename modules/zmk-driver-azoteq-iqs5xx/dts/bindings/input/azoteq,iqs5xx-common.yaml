@@ -51,6 +51,17 @@ properties:
       fingers of a scroll are not lifted at exactly the same time.
     default: 150
 
+  two-finger-nav:
+    type: boolean
+    description: |
+      Turn horizontal two-finger swipes into mouse back (fingers right) and
+      forward (fingers left) clicks, once per swipe. Replaces horizontal scroll.
+
+  two-finger-nav-distance:
+    type: int
+    description: "Horizontal two-finger travel (in trackpad units) that triggers back/forward"
+    default: 300
+
   switch-xy:
     type: boolean
     description: "Flip x and y axes"

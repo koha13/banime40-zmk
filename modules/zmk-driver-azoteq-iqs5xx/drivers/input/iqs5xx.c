@@ -67,7 +67,7 @@ static void iqs5xx_button_release_work_handler(struct k_work *work) {
 
     // TODO: This loop should only deactivate one button.
     // Log a warning when that is not the case.
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 5; i++) {
         LOG_INF("Releasing synthetic button");
         if (data->buttons_pressed & BIT(i)) {
             input_report_key(data->dev, INPUT_BTN_0 + i, 0, true, K_FOREVER);
@@ -124,6 +124,8 @@ static void iqs5xx_work_handler(struct k_work *work) {
         // Clear accumulators if we're not actively scrolling.
         data->scroll_x_acc = 0;
         data->scroll_y_acc = 0;
+        data->nav_x_acc = 0;
+        data->nav_fired = false;
     }
 
     uint16_t button_code;
@@ -191,6 +193,25 @@ static void iqs5xx_work_handler(struct k_work *work) {
 
         // Only one scrolling direction is valid at a time.
         // End the communication right after reporting the movement.
+        if (rel_x != 0 && config->two_finger_nav) {
+            // One back/forward per swipe; the cooldown guards against the scroll
+            // flag briefly dropping mid-swipe and re-arming the gesture.
+            data->nav_x_acc += rel_x;
+            if (!data->nav_fired && abs(data->nav_x_acc) >= config->two_finger_nav_distance &&
+                k_uptime_get() - data->last_nav_ms > IQS5XX_NAV_COOLDOWN_MS) {
+                // Fingers moving right = back (content follows the fingers), as on Windows.
+                uint16_t code = data->nav_x_acc > 0 ? BACK_BUTTON_CODE : FORWARD_BUTTON_CODE;
+
+                k_work_cancel_delayable(&data->button_release_work);
+                input_report_key(dev, code, 1, true, K_FOREVER);
+                data->buttons_pressed |= BIT(code - INPUT_BTN_0);
+                k_work_schedule(&data->button_release_work, K_MSEC(100));
+
+                data->nav_fired = true;
+                data->last_nav_ms = k_uptime_get();
+            }
+            goto end_comm;
+        }
         if (rel_x != 0) {
             // By default the x axis is already "natural".
             if (!config->natural_scroll_x) {
@@ -421,7 +442,11 @@ static int iqs5xx_init(const struct device *dev) {
         .two_finger_tap = DT_INST_PROP(n, two_finger_tap),                                         \
         .scroll = DT_INST_PROP(n, scroll),                                                         \
         .natural_scroll_x = DT_INST_PROP(n, natural_scroll_x),                                     \
-        .natural_scroll_y = DT_INST_PROP(n, natural_scroll_y),                                             .scroll_divisor = DT_INST_PROP_OR(n, scroll_divisor, 32),                                          .multi_finger_lockout_ms = DT_INST_PROP_OR(n, multi_finger_lockout_ms, 150),               \
+        .natural_scroll_y = DT_INST_PROP(n, natural_scroll_y),                                     \
+        .scroll_divisor = DT_INST_PROP_OR(n, scroll_divisor, 32),                                  \
+        .multi_finger_lockout_ms = DT_INST_PROP_OR(n, multi_finger_lockout_ms, 150),               \
+        .two_finger_nav = DT_INST_PROP(n, two_finger_nav),                                         \
+        .two_finger_nav_distance = DT_INST_PROP_OR(n, two_finger_nav_distance, 300),               \
         .press_and_hold_time = DT_INST_PROP_OR(n, press_and_hold_time, 250),                       \
         .switch_xy = DT_INST_PROP(n, switch_xy),                                                   \
         .flip_x = DT_INST_PROP(n, flip_x),                                                         \

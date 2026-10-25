@@ -57,7 +57,8 @@ Diode direction: `COL2ROW` (rows = input pull-down, cols = output).
 Driver: bản vendor của [AYM1607/zmk-driver-azoteq-iqs5xx](https://github.com/AYM1607/zmk-driver-azoteq-iqs5xx)
 @`27321f0` trong `modules/zmk-driver-azoteq-iqs5xx/`, nạp qua `zephyr/module.yml` của repo.
 Thay đổi so với bản gốc: thuộc tính `scroll-divisor` (tốc độ cuộn) và `multi-finger-lockout-ms`
-(không di con trỏ khi đang đặt 2 ngón hoặc ngay sau khi cuộn). TPS43 dùng chip IQS572, giao tiếp I2C địa chỉ `0x74`.
+(không di con trỏ khi đang đặt 2 ngón hoặc ngay sau khi cuộn), `two-finger-nav`
+(vuốt ngang 2 ngón = nút chuột Back/Forward). TPS43 dùng chip IQS572, giao tiếp I2C địa chỉ `0x74`.
 
 | TPS43 | `&pro_micro` | nRF52840 |
 |-------|--------------|----------|
@@ -69,7 +70,8 @@ Thay đổi so với bản gốc: thuộc tính `scroll-divisor` (tốc độ cu
 | GND   | GND          | —        |
 
 Gesture mặc định (sửa trong node `tps43` của `banime40.overlay`): chạm 1 ngón = click trái,
-chạm 2 ngón = click phải, chạm-giữ = kéo thả, vuốt 2 ngón = cuộn.
+chạm 2 ngón = click phải, chạm-giữ = kéo thả, vuốt dọc 2 ngón = cuộn,
+vuốt ngang 2 ngón = Back (sang phải) / Forward (sang trái).
 Nếu hướng con trỏ bị ngược/xoay, thêm `switch-xy;`, `flip-x;`, `flip-y;` vào node.
 
 ## Lưu ý về keymap

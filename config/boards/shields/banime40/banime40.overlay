@@ -86,6 +86,8 @@
          */
         scroll-divisor = <16>;           /* đơn vị chip / 1 nấc cuộn, mặc định 32; nhỏ hơn = nhanh hơn */
         multi-finger-lockout-ms = <150>; /* khoá con trỏ sau khi nhấc 2 ngón, tránh nhảy chuột */
+        two-finger-nav;                  /* 2 ngón vuốt phải = Back, trái = Forward (thay cuộn ngang) */
+        two-finger-nav-distance = <300>; /* quãng vuốt để kích hoạt; lớn hơn = khó kích hoạt nhầm */
 
         bottom-beta = <5>;
         stationary-threshold = <5>;
