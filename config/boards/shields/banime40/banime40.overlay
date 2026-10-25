@@ -15,7 +15,6 @@
  */
 
 #include <dt-bindings/zmk/matrix_transform.h>
-#include <input/processors.dtsi>
 
 / {
     chosen {
@@ -85,6 +84,8 @@
          * (nội dung đi theo ngón tay — vuốt xuống thì trang cuộn lên).
          * Thêm natural-scroll-y nếu muốn kiểu bánh xe chuột (vuốt xuống = cuộn xuống).
          */
+        scroll-divisor = <16>;           /* đơn vị chip / 1 nấc cuộn, mặc định 32; nhỏ hơn = nhanh hơn */
+        multi-finger-lockout-ms = <150>; /* khoá con trỏ sau khi nhấc 2 ngón, tránh nhảy chuột */
 
         bottom-beta = <5>;
         stationary-threshold = <5>;
@@ -98,7 +99,5 @@
     tps43_listener: tps43_listener {
         compatible = "zmk,input-listener";
         device = <&tps43>;
-        /* Tăng tốc cuộn x2 (driver cố định 32 đơn vị = 1 nấc). Mượt hơn: <&zip_scroll_scaler 3 2> */
-        input-processors = <&zip_scroll_scaler 2 1>;
     };
 };

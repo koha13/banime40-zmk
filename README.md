@@ -34,7 +34,7 @@ config/
 west init -l config
 west update
 west zephyr-export
-west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=banime40
+west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=banime40 -DZMK_EXTRA_MODULES="$(pwd)"
 # kết quả: build/zephyr/zmk.uf2
 ```
 
@@ -54,8 +54,10 @@ Diode direction: `COL2ROW` (rows = input pull-down, cols = output).
 
 ## Trackpad Azoteq TPS43
 
-Driver: [AYM1607/zmk-driver-azoteq-iqs5xx](https://github.com/AYM1607/zmk-driver-azoteq-iqs5xx)
-(khai báo trong `config/west.yml`). TPS43 dùng chip IQS572, giao tiếp I2C địa chỉ `0x74`.
+Driver: bản vendor của [AYM1607/zmk-driver-azoteq-iqs5xx](https://github.com/AYM1607/zmk-driver-azoteq-iqs5xx)
+@`27321f0` trong `modules/zmk-driver-azoteq-iqs5xx/`, nạp qua `zephyr/module.yml` của repo.
+Thay đổi so với bản gốc: thuộc tính `scroll-divisor` (tốc độ cuộn) và `multi-finger-lockout-ms`
+(không di con trỏ khi đang đặt 2 ngón hoặc ngay sau khi cuộn). TPS43 dùng chip IQS572, giao tiếp I2C địa chỉ `0x74`.
 
 | TPS43 | `&pro_micro` | nRF52840 |
 |-------|--------------|----------|

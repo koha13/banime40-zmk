@@ -82,7 +82,7 @@ static void iqs5xx_work_handler(struct k_work *work) {
     struct iqs5xx_data *data = CONTAINER_OF(work, struct iqs5xx_data, work);
     const struct device *dev = data->dev;
     const struct iqs5xx_config *config = dev->config;
-    uint8_t sys_info_0, sys_info_1, gesture_events_0, gesture_events_1, num_fingers;
+    uint8_t sys_info_0, sys_info_1, gesture_events_0, gesture_events_1, num_fingers = 0;
     int ret;
 
     // Read system info registers.
@@ -152,6 +152,16 @@ static void iqs5xx_work_handler(struct k_work *work) {
             LOG_ERR("Failed to read relative Y: %d", ret);
             goto end_comm;
         }
+
+        ret = iqs5xx_read_reg8(dev, IQS5XX_NUM_FINGERS, &num_fingers);
+        if (ret < 0) {
+            LOG_ERR("Failed to read number of fingers: %d", ret);
+            goto end_comm;
+        }
+
+        if (scroll || num_fingers >= 2) {
+            data->last_multi_finger_ms = k_uptime_get();
+        }
     }
 
     // Handle movement and gestures.
@@ -177,8 +187,7 @@ static void iqs5xx_work_handler(struct k_work *work) {
         // Schedule release after 100ms.
         k_work_schedule(&data->button_release_work, K_MSEC(100));
     } else if (scroll) {
-        // TODO: Expose this divisor.
-        int16_t scroll_div = 32;
+        int16_t scroll_div = config->scroll_divisor;
 
         // Only one scrolling direction is valid at a time.
         // End the communication right after reporting the movement.
@@ -209,13 +218,13 @@ static void iqs5xx_work_handler(struct k_work *work) {
             goto end_comm;
         }
     } else if (tp_movement) {
-        ret = iqs5xx_read_reg8(dev, IQS5XX_NUM_FINGERS, &num_fingers);
-        if (ret < 0) {
-            LOG_ERR("Failed to read number of fingers: %d", ret);
-            goto end_comm;
-        }
+        // Two fingers that have not (yet) been recognized as a scroll, or a finger
+        // lifted a bit later than the other one at the end of a scroll, must not
+        // move the cursor.
+        bool multi_finger_recent =
+            k_uptime_get() - data->last_multi_finger_ms < config->multi_finger_lockout_ms;
 
-        if (rel_x != 0 || rel_y != 0) {
+        if (num_fingers < 2 && !multi_finger_recent && (rel_x != 0 || rel_y != 0)) {
             input_report_rel(dev, INPUT_REL_X, rel_x, false, K_FOREVER);
             input_report_rel(dev, INPUT_REL_Y, rel_y, true, K_FOREVER);
         }
@@ -412,7 +421,7 @@ static int iqs5xx_init(const struct device *dev) {
         .two_finger_tap = DT_INST_PROP(n, two_finger_tap),                                         \
         .scroll = DT_INST_PROP(n, scroll),                                                         \
         .natural_scroll_x = DT_INST_PROP(n, natural_scroll_x),                                     \
-        .natural_scroll_y = DT_INST_PROP(n, natural_scroll_y),                                     \
+        .natural_scroll_y = DT_INST_PROP(n, natural_scroll_y),                                             .scroll_divisor = DT_INST_PROP_OR(n, scroll_divisor, 32),                                          .multi_finger_lockout_ms = DT_INST_PROP_OR(n, multi_finger_lockout_ms, 150),               \
         .press_and_hold_time = DT_INST_PROP_OR(n, press_and_hold_time, 250),                       \
         .switch_xy = DT_INST_PROP(n, switch_xy),                                                   \
         .flip_x = DT_INST_PROP(n, flip_x),                                                         \

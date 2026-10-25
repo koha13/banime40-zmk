@@ -126,6 +126,10 @@ struct iqs5xx_config {
     bool scroll;
     bool natural_scroll_x;
     bool natural_scroll_y;
+    // Chip units of two-finger travel per reported wheel step (lower = faster).
+    uint16_t scroll_divisor;
+    // Cursor movement is suppressed for this long after the last multi-finger report.
+    uint16_t multi_finger_lockout_ms;
 
     // Axes configuration.
     bool switch_xy;
@@ -150,4 +154,6 @@ struct iqs5xx_data {
     // Scroll accumulators.
     int16_t scroll_x_acc;
     int16_t scroll_y_acc;
+    // Uptime of the last report with two or more fingers on the pad.
+    int64_t last_multi_finger_ms;
 };
